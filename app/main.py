@@ -29,13 +29,16 @@ app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
 # Или используйте опциональную проверку
 app.add_middleware(OptionalAuthMiddleware)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
+# CORS настраиваются в nginx, чтобы избежать дублирования заголовков
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
 app.include_router(api_router, prefix=settings.API_V1_STR)
 # nodemon --watch app --watch alembic --ext py,env \
 #   --ignore venv --ignore .git --signal SIGTERM \
