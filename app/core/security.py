@@ -15,7 +15,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ALGORITHM = "HS256"
 
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl="/v1/auth/login"
+    tokenUrl="/v1/auth/login/form"
 )
 
 

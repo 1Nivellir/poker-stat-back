@@ -8,7 +8,7 @@ from app import crud
 from app.api.deps import SessionDep
 from app.core.config import settings
 from app.core.security import verify_password, create_access_token, create_refresh_token, verify_refresh_token
-from app.models import Token, TokenWithRefresh, RefreshTokenRequest, UserPublic, UserRegister, Message
+from app.models import Token, TokenWithRefresh, RefreshTokenRequest, UserPublic, UserRegister, UserLogin, Message
 from app.api.deps import get_current_user
 
 
@@ -31,10 +31,37 @@ def create_user(user_in: UserRegister, session: SessionDep):
     return user
 
 @router.post("/login", response_model=TokenWithRefresh)
-def login_access_token(
+def login_json(user_login: UserLogin, session: SessionDep):
+		"""
+		Вход с JSON: {"email": "...", "password": "..."}
+		"""
+		user = crud.get_user_by_email(session=session, email=user_login.email)
+		if not user:
+			raise HTTPException(status_code=401, detail="Неверный email или пароль")
+		if not verify_password(user_login.password, user.hashed_password):
+			raise HTTPException(status_code=401, detail="Неверный email или пароль")
+		
+		access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+		access_token = create_access_token(user.id, expires_delta=access_token_expires)
+		
+		refresh_token_expires = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+		refresh_token = create_refresh_token(user.id, expires_delta=refresh_token_expires)
+		
+		return {
+			"access_token": access_token, 
+			"refresh_token": refresh_token,
+			"token_type": "bearer"
+		}
+
+@router.post("/login/form", response_model=TokenWithRefresh)
+def login_form(
 		form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 		session: SessionDep,
     ):
+		"""
+		OAuth2 compatible token login (для Swagger UI).
+		Использует form-data: username (email) и password
+		"""
 		user = crud.get_user_by_email(session=session, email=form_data.username)
 		if not user:
 			raise HTTPException(status_code=401, detail="Incorrect username or password")
