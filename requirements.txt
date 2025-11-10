@@ -9,5 +9,6 @@ pydantic-settings
 sqlmodel
 psycopg2-binary
 python-dotenv
+python-multipart
 emails
 alembic
