@@ -1,6 +1,6 @@
 # import logging
 from collections.abc import Generator
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI
 from sqlmodel import Session, SQLModel, select
 from app.core.db import engine
 from contextlib import asynccontextmanager
@@ -8,6 +8,7 @@ from sqlmodel import SQLModel
 from app.api.main import api_router
 from app.core.config import settings
 from app.middleware import AuthMiddleware, OptionalAuthMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 # ВАЖНО: Импортируем модели чтобы SQLModel знал о них
 from app.models import User, Torney
@@ -28,7 +29,13 @@ app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
 # Или используйте опциональную проверку
 app.add_middleware(OptionalAuthMiddleware)
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(api_router, prefix=settings.API_V1_STR)
 # nodemon --watch app --watch alembic --ext py,env \
 #   --ignore venv --ignore .git --signal SIGTERM \
