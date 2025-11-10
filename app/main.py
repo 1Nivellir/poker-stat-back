@@ -33,7 +33,12 @@ app.add_middleware(OptionalAuthMiddleware)
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", '*'],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://155.212.247.68",
+        "http://localhost:5173",  # Vite dev server
+    ],
     allow_credentials=True,
     allow_methods=["DELETE", "GET", "POST", "PUT", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
